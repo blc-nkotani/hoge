@@ -5,7 +5,7 @@ on:
     branches:
       - master
   repository_dispatch:
-    types: [ '${ secrets.MICROCMS_TRIGGER_EVENT }' ]
+    types: [ 'post' ]
 
 jobs:
   FTP-Deploy-Action:
