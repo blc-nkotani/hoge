@@ -1,0 +1,37 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  repository_dispatch:
+    types: [ '${ secrets.MICROCMS_TRIGGER_EVENT }' ]
+
+jobs:
+  FTP-Deploy-Action:
+    name: FTP-Deploy-Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v2.3.2
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '16'
+
+      - name: Build Project
+        run: |
+          touch .env
+          echo "SERVICE_DOMAIN =${{ secrets.SERVICE_DOMAIN }}" >> .env
+          echo "API_KEY =${{ secrets.API_KEY }}" >> .env
+          npm install
+          npm run build
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./out/
+          server-dir: ${{ secrets.REMOTE_PATH }}
